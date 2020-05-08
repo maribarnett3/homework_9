@@ -5,7 +5,11 @@
 // ===============================================================================
 
 var notesData = require("../db/db.json");
-
+const fs = require("fs");
+const path = require("path");
+const OUTPUT_DIR = path.resolve(__dirname, "../db");
+const outputPath = path.join(OUTPUT_DIR, "db.json");
+//   notesData = []
 // ===============================================================================
 // ROUTING
 // ===============================================================================
@@ -18,7 +22,12 @@ module.exports = function (app) {
   // ---------------------------------------------------------------------------
 
   app.get("/api/notes", function (req, res) {
-    res.json(notesData);
+    let responseData = JSON.parse(JSON.stringify(notesData))
+    for (let i = 0; i < responseData.length; i++) {
+      responseData[i].id = i;
+
+    }
+    res.json(responseData);
   });
 
 
@@ -41,6 +50,10 @@ module.exports = function (app) {
       notesData.push(req.body);
 
     }
+    console.log(notesData)
+    fs.writeFileSync(outputPath, JSON.stringify(notesData), err => {
+      console.log(err)
+    })
     res.json(true);
   });
 
@@ -50,8 +63,13 @@ module.exports = function (app) {
 
   app.delete("/api/notes/:id", function (req, res) {
     const id = req.params.id
+   
     if (notesData[id])
       notesData.splice(id, 1)
+
+    fs.writeFile(outputPath, JSON.stringify(notesData), err => {
+      // console.log(err)
+    })
 
     res.json({ ok: true });
   });
